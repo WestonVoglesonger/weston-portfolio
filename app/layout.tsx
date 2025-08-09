@@ -7,6 +7,10 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Weston Voglesonger',
   description: 'Engineer & builder obsessed with making ambitious ideas usable.',
+  icons: {
+    icon: '/favicon.ico',
+  },
+  metadataBase: new URL('https://weston-voglesonger.vercel.app'), // Replace with your actual domain
 };
 
 export default function RootLayout({

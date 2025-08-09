@@ -21,7 +21,7 @@ export default function ExperiencePage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
               <div>
                 <h3 className="text-xl font-semibold">Software Engineer</h3>
-                <p className="text-muted-foreground">Tech‑Dash, Method Inc.</p>
+                <p className="text-muted-foreground">Method Inc.</p>
               </div>
               <div className="text-sm text-muted-foreground">Jun 2025 – Present</div>
             </div>
@@ -60,6 +60,16 @@ export default function ExperiencePage() {
             <div className="space-y-1 text-sm">
               <p>• React / Next.js / Firebase stack with SSR and Firestore</p>
               <p>• Reusable design system accelerated future tools by 30%</p>
+            </div>
+          </div>
+
+          {/* NEXUS Knowledge Hub */}
+          <div className="rounded-2xl border bg-card p-6 shadow-soft">
+            <h3 className="text-lg font-semibold mb-2">NEXUS — Knowledge Hub</h3>
+            <p className="text-sm text-muted-foreground mb-3">Faceted knowledge-management platform for Method Inc.</p>
+            <div className="space-y-1 text-sm">
+              <p>• Next.js 15 static export with Firebase Auth & Firestore</p>
+              <p>• MVP shipped in two 5-day sprints leading 13 interns across 3 teams</p>
             </div>
           </div>
 

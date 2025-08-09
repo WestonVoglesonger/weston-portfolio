@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, X, Images } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,13 +20,13 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  }, [images.length]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  }, [images.length]);
 
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
@@ -48,7 +48,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, goToPrevious, goToNext]);
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -98,9 +98,8 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
               </div>
               <Button
                 variant="ghost"
-                size="icon"
                 onClick={() => setIsOpen(false)}
-                className="text-white hover:bg-white/10"
+                className="text-white hover:bg-white/10 h-10 w-10"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -123,16 +122,14 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
                 <>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 h-10 w-10"
                     onClick={goToPrevious}
                   >
                     <ChevronLeft className="h-6 w-6" />
                   </Button>
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 h-10 w-10"
                     onClick={goToNext}
                   >
                     <ChevronRight className="h-6 w-6" />

@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   title: 'Weston Voglesonger',
   description: 'Engineer & builder obsessed with making ambitious ideas usable.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/portfolio-logo.png',
+    apple: '/portfolio-logo.png',
   },
   metadataBase: new URL('https://weston-voglesonger.vercel.app'), // Replace with your actual domain
 };

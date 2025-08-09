@@ -12,7 +12,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-6">
           <Link className="flex items-center" href="/">
             <Image 
-              src="/portfolio-logo.png?v=2" 
+              src="/weston-logo-v2.png" 
               alt="Weston Voglesonger Logo" 
               width={32} 
               height={32}

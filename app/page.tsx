@@ -43,7 +43,7 @@ export default async function HomePage() {
           <Link className="hover:underline" href="/resume">
             Résumé
           </Link>
-          <Link className="hover:underline" href="/writing">
+          <Link className="hover:underline" href="/writings">
             Writings
           </Link>
         </div>

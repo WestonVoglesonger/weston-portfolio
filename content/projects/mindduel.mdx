@@ -1,0 +1,51 @@
+---
+title: "MindDuel — Real-Time Trivia Game"
+slug: "mindduel"
+date: "2025-10"
+role: "Sole Developer"
+tags: ["Real-Time", "Full-Stack", "Gaming", "Supabase"]
+summary: "Competitive 1v1 trivia game with ELO-based matchmaking, 200k+ questions from Jeopardy archives, and real-time WebSocket gameplay built on Next.js and Supabase."
+stack: ["Next.js 14+ (App Router)", "TypeScript", "Supabase (Postgres, Auth, Realtime)", "Tailwind", "shadcn/ui"]
+links:
+  repo: "https://github.com/WestonVoglesonger/MindDuel"
+  demo: "https://mind-duel-psi.vercel.app"
+impact:
+  - "200k+ trivia questions sourced and imported from Jeopardy archives"
+  - "ELO rating system with adaptive K-factor (K=32 → K=16 as games increase)"
+  - "Sub-100ms buzzer latency via Supabase Realtime WebSocket channels"
+  - "Server-side timing validation prevents client-side cheating"
+accent: "#8B5CF6"
+---
+
+## The idea
+
+Trivia apps are everywhere, but most of them feel like solo flashcard drills. The fun of trivia is the competitive moment — buzzing in before someone else, the risk of an early guess, the swings in score. MindDuel is built around that real-time competitive experience: 1v1 matches with a physical buzzer mechanic, ELO-based matchmaking, and a massive question bank sourced from Jeopardy archives.
+
+## How it works
+
+Players sign up and enter a matchmaking queue. The system finds an opponent within ±100 ELO and creates a game session with a 5×5 grid of trivia questions across categories. Players take turns selecting questions. When a question is revealed, both players race to buzz in. The first to buzz gets 5 seconds to type an answer. Correct answers earn points; incorrect answers lose points and give the opponent a chance.
+
+Games typically run 10–15 minutes. After the match, ELO ratings adjust based on the outcome and the skill gap between players.
+
+## Real-time architecture
+
+The core technical challenge is making the buzzer feel instant while keeping it fair. All game state flows through Supabase Realtime channels — WebSocket connections that broadcast state changes to both players simultaneously. When a player buzzes, the event is timestamped server-side, preventing any client-side manipulation.
+
+The buzzer system uses Supabase's broadcast feature with server timestamps as the source of truth. Even if one player has lower network latency, the server determines who buzzed first. This eliminates the most common cheating vector in real-time competitive games.
+
+Score updates, question reveals, and game state transitions all propagate through the same Realtime subscription, keeping the UI synchronized across both clients with sub-100ms latency.
+
+## ELO matchmaking
+
+The rating system uses an adaptive K-factor strategy:
+- **K=32** for new players (under 30 games) — ratings move quickly during calibration
+- **K=24** for intermediate players (30–99 games)
+- **K=16** for established players (100+ games) — ratings stabilize
+
+Matchmaking starts with a narrow ±100 ELO window and gradually expands if no match is found, balancing match quality against queue time.
+
+## Data layer
+
+The database schema centers on a few core tables: users (profiles + ELO), questions (200k+ with categories and difficulty), game sessions (active and completed), and buzzer events (the real-time interaction log). Row Level Security policies ensure players can only see their own data and active game state. All game actions are validated server-side before state changes propagate.
+
+The question bank was imported from publicly available Jeopardy archive data, cleaned and categorized for the 5×5 grid format.

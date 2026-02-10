@@ -6,7 +6,7 @@ export default function ContactPage() {
       <h1 className="text-3xl font-semibold">Contact</h1>
       <p className="text-muted-foreground">I read most messages.</p>
       <div className="rounded-2xl border p-6">
-        <a className="text-lg font-medium underline" href="mailto:hello@westonv.dev">
+        <a className="text-lg font-medium underline" href="mailto:westonvogle@gmail.com">
           westonvogle@gmail.com
         </a>
         <div className="mt-4 flex gap-4 text-sm">

@@ -11,12 +11,13 @@ export default function AboutPage() {
             Hi there 👋 I&apos;m Weston Voglesonger
           </h1>
           <p className="max-w-[68ch] text-lg text-muted-foreground">
-            Attempting to build cool shit... Engineer & builder obsessed with making ambitious ideas usable.
+            Attempting to build cool shit... Undergrad researcher building real-time infrastructure for brain-computer interfaces.
           </p>
           <div className="flex flex-wrap gap-3 text-sm">
             <span className="rounded-full border bg-[rgba(0,0,0,.03)] px-3 py-1">Full‑stack development</span>
             <span className="rounded-full border bg-[rgba(0,0,0,.03)] px-3 py-1">AI/ML engineering</span>
-            <span className="rounded-full border bg-[rgba(0,0,0,.03)] px-3 py-1">Hardware projects</span>
+            <span className="rounded-full border bg-[rgba(0,0,0,.03)] px-3 py-1">BCI research</span>
+            <span className="rounded-full border bg-[rgba(0,0,0,.03)] px-3 py-1">Real-time systems</span>
             <span className="rounded-full border bg-[rgba(0,0,0,.03)] px-3 py-1">Entrepreneurship</span>
           </div>
           <div className="flex gap-3 pt-2">
@@ -31,17 +32,17 @@ export default function AboutPage() {
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-5 shadow-soft">
           <div className="text-sm text-muted-foreground">Edge Carolina</div>
-          <div className="text-xl font-medium">100+ members</div>
-          <div className="text-xs text-muted-foreground">Founded & lead organization</div>
+          <div className="text-xl font-medium">150+ members</div>
+          <div className="text-xs text-muted-foreground">Founded 501(c)(3) organization</div>
         </div>
         <div className="rounded-2xl border bg-card p-5 shadow-soft">
           <div className="text-sm text-muted-foreground">NEXUS (Method)</div>
           <div className="text-xl font-medium">MVP in 2 weeks</div>
-          <div className="text-xs text-muted-foreground">Led 6 engineers</div>
+          <div className="text-xs text-muted-foreground">Led 13-person team</div>
         </div>
         <div className="rounded-2xl border bg-card p-5 shadow-soft">
           <div className="text-sm text-muted-foreground">GitHub Activity</div>
-          <div className="text-xl font-medium">30+ repos</div>
+          <div className="text-xl font-medium">40+ repos</div>
           <div className="text-xs text-muted-foreground">Active open source</div>
         </div>
       </section>
@@ -51,13 +52,13 @@ export default function AboutPage() {
         <div className="rounded-2xl border bg-card p-6 shadow-soft">
           <h3 className="mb-2 font-medium">Current Focus</h3>
           <p className="text-sm text-muted-foreground">
-            Building AI-powered applications, leading Edge Carolina, and exploring hardware projects like EEG BCIs and pill identification systems.
+            Undergrad BCI research with Dr. Raghavendra Pothukuchi — building CORTEX, a real-time benchmarking ecosystem for brain-computer interface kernels. Leading Edge Carolina.
           </p>
         </div>
         <div className="rounded-2xl border bg-card p-6 shadow-soft">
           <h3 className="mb-2 font-medium">What&apos;s Next</h3>
           <p className="text-sm text-muted-foreground">
-            Scaling multi-agent systems, expanding Edge Carolina&apos;s impact, and pushing the boundaries of on-device AI inference.
+            Building foundational infrastructure for the BCI field — tooling, benchmarks, and frameworks that make neurotechnology research more rigorous and reproducible.
           </p>
         </div>
       </section>
@@ -66,17 +67,15 @@ export default function AboutPage() {
       <section className="rounded-2xl border bg-card p-6 shadow-soft">
         <h3 className="mb-3 font-medium">Technical Specialties</h3>
         <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+          <span className="rounded-full border px-3 py-1">C</span>
           <span className="rounded-full border px-3 py-1">React / Next.js / TypeScript</span>
           <span className="rounded-full border px-3 py-1">Python / FastAPI / PyTorch</span>
-          <span className="rounded-full border px-3 py-1">Rust / ONNX Runtime</span>
+          <span className="rounded-full border px-3 py-1">Supabase / Prisma</span>
           <span className="rounded-full border px-3 py-1">Firebase / Firestore</span>
           <span className="rounded-full border px-3 py-1">Multi-agent systems</span>
-          <span className="rounded-full border px-3 py-1">Hardware / PCB design</span>
           <span className="rounded-full border px-3 py-1">EEG / BCI development</span>
         </div>
       </section>
     </div>
   );
 }
-
-

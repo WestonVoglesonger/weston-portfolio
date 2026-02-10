@@ -1,0 +1,53 @@
+---
+title: "ARDA — Automated RTL Design Agents"
+slug: "arda"
+date: "2025-10"
+role: "Sole Developer"
+tags: ["AI", "Hardware", "FPGA", "Agents"]
+summary: "AI-powered pipeline that converts Python algorithms into production-quality SystemVerilog RTL for FPGA implementation, using specialized agents at each stage of the hardware design flow."
+stack: ["Python", "OpenAI GPT", "SystemVerilog", "Multi-agent pipeline"]
+links:
+  repo: "https://github.com/WestonVoglesonger/ARDA"
+impact:
+  - "Eight-stage pipeline: Spec → Quant → MicroArch → Architecture → RTL → Verification → Synth → Evaluate"
+  - "Specialized AI agents with domain-specific tools at each pipeline stage"
+  - "Synthesis-verified SystemVerilog output with functional verification"
+  - "FPGA resource budget management and optimization"
+accent: "#F59E0B"
+---
+
+## The gap between algorithms and hardware
+
+Turning a Python algorithm into synthesizable RTL is one of the most labor-intensive tasks in hardware engineering. You go from high-level math to fixed-point arithmetic, micro-architectural decisions, pipeline staging, and finally thousands of lines of SystemVerilog — each step requiring specialized knowledge and careful verification. ARDA automates this entire flow using AI agents.
+
+## Pipeline architecture
+
+ARDA's pipeline mirrors how a hardware engineer actually works, broken into eight sequential stages:
+
+1. **Spec** — Parse the input Python algorithm and extract a formal specification: inputs, outputs, data types, computational graph, and performance requirements.
+
+2. **Quant** — Convert floating-point operations to fixed-point arithmetic. Determine bit widths, analyze quantization error, and ensure numerical accuracy meets the spec's tolerance.
+
+3. **MicroArch** — Design the micro-architecture: pipeline depth, resource sharing strategy, memory organization, and datapath topology. This is where the agent makes the key tradeoffs between area, latency, and throughput.
+
+4. **Architecture** — Refine the micro-architecture into a detailed architectural specification with exact signal widths, FSM states, and timing diagrams.
+
+5. **RTL** — Generate SystemVerilog from the architectural spec. The output is synthesis-ready, not behavioral — proper clock domains, reset handling, and coding style for FPGA tools.
+
+6. **Verification** — Generate test vectors from the original Python algorithm, build a testbench, and verify functional correctness of the generated RTL.
+
+7. **Synth** — Run synthesis and analyze resource utilization against the FPGA budget. Flag timing violations or resource overflows.
+
+8. **Evaluate** — Compare the final implementation against the original spec: latency, throughput, area, and numerical accuracy.
+
+Each stage is handled by a specialized AI agent with domain-specific tools and prompts. The agents use a confidence-based feedback loop — if an agent's confidence in its output drops below a threshold, it iterates before passing results downstream.
+
+## Why agents, not a monolithic model
+
+A single LLM prompt can't reliably handle the full algorithm-to-RTL flow. The design space is too large and the constraints at each stage are too different. Quantization requires numerical analysis; micro-architecture requires area/timing tradeoffs; RTL generation requires synthesis tool compatibility.
+
+By splitting the pipeline into specialized agents, each one operates in a focused context with relevant tools and evaluation criteria. The spec agent doesn't need to know about FPGA resource budgets; the synth agent doesn't need to understand quantization theory. This modularity also makes the system extensible — adding support for a new FPGA family or a different HDL is a change to one or two agents, not a rewrite of the entire pipeline.
+
+## Current status
+
+ARDA successfully generates synthesis-verified SystemVerilog for basic algorithmic blocks. The pipeline handles the happy path well — algorithms with clean dataflow graphs, moderate complexity, and standard fixed-point requirements. More complex scenarios (irregular memory access patterns, dynamic control flow, multi-clock domains) are areas for continued development.

@@ -1,0 +1,86 @@
+---
+title: "CORTEX — BCI Benchmarking Ecosystem"
+slug: "cortex"
+date: "2025-09"
+role: "Sole Developer & Researcher"
+tags: ["BCI", "Real-Time Systems", "Benchmarking", "Research"]
+summary: "Production-grade benchmarking framework for brain-computer interface signal processing, built on an AWS-inspired primitives architecture. Measures latency, jitter, throughput, and memory for BCI kernels under real-time deadlines."
+stack: ["C (engine)", "Python (CLI & analysis)", "PEP 517/518 packaging", "ABI v3 SDK"]
+links:
+  repo: "https://github.com/WestonVoglesonger/CORTEX"
+impact:
+  - "260+ commits, 100k+ lines of code across C engine and Python CLI"
+  - "Discovered the 'Idle Paradox' — idle systems produce worse latency due to DVFS effects"
+  - "Validated <1µs harness overhead, <13% of all kernel signals"
+  - "Four-component architecture: primitives registry, execution engine, SDK, and CLI"
+  - "Undergraduate research with Dr. Raghavendra Pothukuchi at UNC Chapel Hill"
+accent: "#10B981"
+---
+
+## The problem
+
+Brain-computer interfaces process neural signals under hard real-time constraints — a BCI kernel that misses a deadline doesn't just slow down, it drops data or produces stale control signals. Yet the field has no standardized way to benchmark these kernels. Researchers report throughput in papers but rarely measure jitter, tail latency, or memory behavior under realistic conditions. There's no equivalent of SPEC CPU or MLPerf for BCI signal processing.
+
+CORTEX was built to fill that gap: a production-grade framework that measures what actually matters for real-time BCI performance.
+
+## Architecture: primitives all the way down
+
+CORTEX follows an AWS-inspired primitives philosophy. Everything — kernels, configurations, datasets — is a composable building block that can be versioned, shared, and combined independently.
+
+The system has four core components:
+
+1. **Primitives registry** — versioned kernels, datasets, and configuration templates that live in the repository and compose freely. A kernel is a shared library exposing three functions (`init`, `process`, `cleanup`). A dataset is a directory with EEG samples and a `spec.yaml` describing channel count, sample rate, and format. Configs wire them together.
+
+2. **C execution engine** — the harness that loads kernel plugins, replays EEG data through them, enforces real-time scheduling (SCHED_FIFO/RR on Linux), and captures per-sample telemetry. The engine is deliberately minimal: timing, dispatch, memcpy, bookkeeping. No allocations in the hot path.
+
+3. **ABI v3 SDK** — headers, libraries, and tooling for kernel developers. The SDK defines the plugin interface and provides build scaffolding so new kernels can be created and tested independently. ABI v3 added support for trainable kernels (ICA, CSP) with offline calibration and runtime state management.
+
+4. **Python CLI** — the user-facing tool that orchestrates everything. `cortex pipeline` runs the full sequence: build, validate numerical correctness against SciPy/MNE oracles, benchmark, and analyze. `cortex run` does fast execution for iteration after initial verification.
+
+## Current kernels
+
+The framework ships with eight signal processing kernels spanning the BCI pipeline:
+
+- **CAR** (Common Average Reference) — spatial filtering baseline
+- **Notch IIR** — 60 Hz line noise removal with configurable center frequency and Q
+- **Bandpass FIR** — 8–30 Hz motor imagery band, 129-tap filter
+- **Goertzel** — alpha/beta bandpower extraction via configurable frequency bins
+- **Welch PSD** — power spectral density with configurable FFT size and overlap
+- **ICA** — independent component analysis for artifact removal (trainable, ABI v3)
+- **CSP** — common spatial patterns for motor imagery classification (trainable, ABI v3)
+- **No-op** — identity function used to measure pure harness overhead
+
+Each kernel is validated against reference implementations (SciPy, MNE) before any benchmark results are trusted.
+
+## The Idle Paradox
+
+The most surprising finding from the validation studies wasn't about kernels — it was about hardware.
+
+During initial benchmarking on macOS (Apple M1), we observed that idle systems consistently produced *worse* latency than systems under moderate load. The geometric mean across four kernels showed idle runs were 2.31x slower. This was counterintuitive: shouldn't an idle CPU be faster?
+
+The culprit was DVFS (Dynamic Voltage and Frequency Scaling). When the system is idle, macOS aggressively downclocks the CPU to save power. A single-threaded benchmark doesn't generate enough load to trigger frequency scaling back up, so every measurement runs at minimum clock speed.
+
+The fix: run a controlled background load (4 CPUs at 50% utilization) to lock the CPU at its nominal frequency. This doesn't affect measurement accuracy — the benchmark thread still runs on its own core — but it prevents the OS from throttling the processor.
+
+We replicated this on Linux and found the same pattern. The `powersave` governor was 3.21x slower than `performance`. Worse, the `schedutil` governor (Linux's "smart" dynamic scaling) was 4.55x slower — worse than fixed minimum frequency, because the constant frequency switching introduced its own overhead.
+
+The recommendation is simple: use the `performance` governor on Linux, background load on macOS, and never trust benchmark numbers from an idle system.
+
+## Measurement methodology validation
+
+CORTEX's credibility depends on the harness not distorting what it measures. We validated this empirically using the no-op kernel.
+
+The no-op kernel does nothing — it copies input to output and returns. Any latency measured for the no-op kernel is pure harness overhead: timing calls, function dispatch, memcpy, and bookkeeping. Across 2,399 samples on macOS M1:
+
+- **Minimum overhead**: ~1 µs
+- **Components**: timing (~100 ns) + dispatch (~50–100 ns) + memcpy (~800 ns) + bookkeeping (~100 ns)
+- **As fraction of real kernels**: 0.02–12.5% (under 3% for any kernel taking >30 µs)
+- **Signal-to-noise ratio**: 8:1 to 5,000:1 (all exceed the 10:1 industry threshold at typical latency)
+
+This means CORTEX can confidently measure any kernel with latency above ~10 µs without the harness dominating the signal. For sub-microsecond kernels, the overhead would need to be characterized and subtracted — but no current BCI kernel operates at that scale.
+
+## Research context
+
+CORTEX is undergraduate research with Dr. Raghavendra Pothukuchi at UNC Chapel Hill. The project started from a simple question: how do you know if a BCI kernel is fast enough for real-time use? The answer turned out to require building an entire ecosystem — not just a timer around a function call, but validated measurement methodology, cross-platform DVFS characterization, reproducible configuration management, and a plugin architecture that lets researchers add new kernels without touching the engine.
+
+The framework is actively used for ongoing research into BCI kernel performance characterization, with plans to extend into hardware-in-the-loop testing on embedded targets (STM32H7, Jetson) and energy measurement via RAPL and INA226.

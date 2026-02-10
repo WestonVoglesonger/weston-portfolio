@@ -1,0 +1,41 @@
+---
+title: "DueNorth — Course & Assignment Tracker"
+slug: "duenorth"
+date: "2025-08"
+role: "Sole Developer"
+tags: ["Education", "Full-Stack", "Next.js"]
+summary: "Minimal Next.js app for tracking courses and assignments with optional Canvas LMS import, secure authentication, and email verification."
+stack: ["Next.js (App Router)", "TypeScript", "NextAuth (Email + Google)", "Prisma + SQLite", "Tailwind", "React Query", "Zod"]
+links:
+  repo: "https://github.com/WestonVoglesonger/DueNorth"
+  demo: "https://homework-tracker-wheat.vercel.app"
+impact:
+  - "Canvas LMS integration for automatic assignment import"
+  - "Secure token-based email verification and password reset"
+  - "Rate-limited API endpoints with generic responses to prevent account enumeration"
+accent: "#3B82F6"
+---
+
+## Why build another assignment tracker?
+
+Every semester starts the same way: syllabi scattered across Canvas, Google Classroom, and email. You end up maintaining a mental model of due dates that inevitably breaks down by week three. DueNorth exists because I wanted something minimal — not a project management suite, just a clean interface where courses and assignments live in one place with optional automatic import from Canvas.
+
+## Core features
+
+**Canvas LMS integration** — The headline feature. Connect your Canvas account and DueNorth pulls in your courses and assignments automatically. A Vercel cron job hits the Canvas API every 3 hours to keep things synced without manual intervention. No more copying due dates by hand.
+
+**Authentication done right** — NextAuth handles both email/password and Google sign-in. Email accounts go through a full verification flow: secure random tokens, hashed at rest, time-limited, single-use. Password reset follows the same pattern. The credentials provider requires a verified email before granting access.
+
+**Security-first API design** — Every auth endpoint returns generic responses regardless of whether an account exists. Rate limiting prevents brute-force attempts. These aren't theoretical concerns — account enumeration is one of the most common vulnerabilities in student-facing apps, and it's trivially avoidable.
+
+## Technical decisions
+
+The stack is deliberately boring: Next.js App Router for the frontend and API routes, Prisma with SQLite for zero-config local development, Zod for runtime validation, and React Query for server state. No Redis, no message queues, no microservices. The goal was fast iteration on a tool I'd actually use, not architectural showmanship.
+
+SQLite works surprisingly well for this use case. The data model is simple (users, courses, assignments), the write volume is low, and Prisma's migration tooling makes schema changes painless. For production on Vercel, the dev container ships with Postgres and Supabase handles the hosted database.
+
+Canvas token storage uses NextAuth's Account provider model — the token is stored as a linked account rather than a custom field, which keeps the auth flow standard and makes token refresh straightforward.
+
+## What I'd do differently
+
+The app works well for personal use but isn't designed for scale. If I were rebuilding it for a broader audience, I'd add proper multi-tenant Canvas integration (OAuth app instead of personal tokens), push notifications for upcoming deadlines, and a mobile-friendly PWA wrapper. The current Vercel cron approach also has a 3-hour sync delay that could be improved with webhooks if Canvas supports them for the relevant events.

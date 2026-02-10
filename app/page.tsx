@@ -10,10 +10,10 @@ export default async function HomePage() {
       <section className="relative overflow-hidden rounded-2xl border bg-card p-10 shadow-soft bg-grid">
         <div className="relative z-10 space-y-6 fade-in-up">
           <h1 className="text-5xl font-semibold tracking-tight">
-            Building products that ship and scale.
+            Building systems that ship and scale.
           </h1>
           <p className="max-w-[60ch] text-lg text-muted-foreground">
-            I lead and build AI and frontend products end-to-end. Fast, elegant, and accessible by default.
+            I build BCI infrastructure, full-stack products, and AI systems end-to-end. Fast, elegant, and accessible by default.
           </p>
           <div className="flex gap-3">
             <Button asChild size="lg">
@@ -38,7 +38,7 @@ export default async function HomePage() {
 
       <section className="rounded-2xl border bg-card p-6 shadow-soft">
         <h3 className="font-medium">Now</h3>
-        <p className="text-muted-foreground">Focusing on product velocity and AI systems ergonomics.</p>
+        <p className="text-muted-foreground">Building real-time benchmarking infrastructure for brain-computer interfaces. Senior year at UNC Chapel Hill.</p>
         <div className="mt-4 flex gap-4 text-sm">
           <Link className="hover:underline" href="/resume">
             Résumé

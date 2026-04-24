@@ -40,7 +40,7 @@ const WHISPERS = [
 ];
 
 const MAX_DODGES = 3;
-const PROXIMITY = 110;
+const PROXIMITY = 80;
 
 export function CelebratePage() {
   const [dodgeCount, setDodgeCount] = useState(0);
@@ -52,6 +52,7 @@ export function CelebratePage() {
   const noBtnRef = useRef<HTMLButtonElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const dodgeCountRef = useRef(0);
+  const lastDodgeTime = useRef(0);
 
   useEffect(() => {
     dodgeCountRef.current = dodgeCount;
@@ -80,6 +81,10 @@ export function CelebratePage() {
   const dodge = useCallback(
     (clientX: number, clientY: number) => {
       if (dodgeCountRef.current >= MAX_DODGES) return;
+
+      const now = Date.now();
+      if (now - lastDodgeTime.current < 500) return;
+
       const btn = noBtnRef.current;
       if (!btn) return;
 
@@ -89,26 +94,34 @@ export function CelebratePage() {
       const dist = Math.hypot(clientX - cx, clientY - cy);
 
       if (dist < PROXIMITY) {
-        const fleeDistance = 120 + Math.random() * 60;
-        let angle = Math.atan2(cy - clientY, cx - clientX);
-        angle += (Math.random() - 0.5) * 0.8;
+        lastDodgeTime.current = now;
 
-        const rsvpArea = btn.closest('.celebrate-info-side');
-        const bounds = rsvpArea
-          ? rsvpArea.getBoundingClientRect()
-          : { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const margin = 24;
 
-        const pad = 8;
-        const minX = bounds.left + pad;
-        const maxX = bounds.right - rect.width - pad;
-        const minY = bounds.top + pad;
-        const maxY = bounds.bottom - rect.height - pad;
+        // Find content areas to avoid (card side)
+        const cardEl = document.querySelector('.celebrate-card-side');
+        const cardRect = cardEl?.getBoundingClientRect();
 
-        let newX = cx + Math.cos(angle) * fleeDistance - rect.width / 2;
-        let newY = cy + Math.sin(angle) * fleeDistance - rect.height / 2;
+        let newX: number, newY: number, attempts = 0;
+        do {
+          // Bias toward the right half and open space
+          newX = margin + Math.random() * (vw - rect.width - margin * 2);
+          newY = margin + Math.random() * (vh - rect.height - margin * 2);
+          attempts++;
 
-        newX = Math.max(minX, Math.min(maxX, newX));
-        newY = Math.max(minY, Math.min(maxY, newY));
+          // Check if overlapping the card
+          const overlapsCard = cardRect &&
+            newX < cardRect.right + 20 &&
+            newX + rect.width > cardRect.left - 20 &&
+            newY < cardRect.bottom + 20 &&
+            newY + rect.height > cardRect.top - 20;
+
+          const farEnough = Math.hypot(newX + rect.width / 2 - clientX, newY + rect.height / 2 - clientY) >= 250;
+
+          if (!overlapsCard && farEnough) break;
+        } while (attempts < 40);
 
         setIsEscaping(true);
         setNoPos({ x: newX, y: newY });

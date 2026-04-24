@@ -382,55 +382,11 @@ body.celebrate-mode::after {
   50% { transform: rotate(-2deg) translateY(-4px); }
 }
 
-.celebrate-card-inner {
-  border: 1px double var(--c-ink);
-  padding: 48px 36px;
-  background: #fff;
-  position: relative;
-}
-.celebrate-card-inner::before,
-.celebrate-card-inner::after {
-  content: '';
-  position: absolute;
-  width: 24px; height: 24px;
-  border: 1px solid var(--c-ink);
-}
-.celebrate-card-inner::before { top: 8px; left: 8px; border-right: none; border-bottom: none; }
-.celebrate-card-inner::after { bottom: 8px; right: 8px; border-left: none; border-top: none; }
-.celebrate-card-ornament { font-size: 18px; color: var(--c-ember); margin-bottom: 20px; letter-spacing: 0.4em; }
-.celebrate-card-sub {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; letter-spacing: 0.3em; color: var(--c-taupe);
-  margin-bottom: 20px; text-transform: uppercase;
-}
-.celebrate-card-name {
-  font-family: 'Fraunces', serif;
-  font-variation-settings: 'SOFT' 100;
-  font-size: 2rem; font-style: italic; font-weight: 300;
-  line-height: 1.1; margin-bottom: 4px; color: var(--c-ink);
-}
-.celebrate-card-bachelors {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; letter-spacing: 0.3em; color: var(--c-taupe);
-  margin: 14px 0 24px; text-transform: uppercase;
-}
-.celebrate-card-divider { width: 60px; height: 1px; background: var(--c-ember); margin: 20px auto; }
-.celebrate-card-date {
-  font-family: 'Fraunces', serif;
-  font-variation-settings: 'SOFT' 100;
-  font-size: 1.1rem; font-weight: 400; letter-spacing: 0.02em; color: var(--c-ink);
-  margin-bottom: 4px;
-}
-.celebrate-card-time { font-size: 0.85rem; color: var(--c-ink-soft); font-style: italic; font-weight: 300; }
-.celebrate-card-school {
-  margin-top: 24px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9px; letter-spacing: 0.3em; color: var(--c-taupe); text-transform: uppercase;
-}
-.celebrate-card-caption {
-  margin-top: 80px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px; color: var(--c-taupe); letter-spacing: 0.2em; text-transform: uppercase;
+.celebrate-card-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 2px;
 }
 
 /* RSVP */
@@ -623,8 +579,6 @@ body.celebrate-mode::after {
   .celebrate-details-body { padding: 28px 24px; }
   .celebrate-detail-row { grid-template-columns: 80px 1fr; gap: 16px; }
   .celebrate-card-section { padding: 60px 0 40px; }
-  .celebrate-card-inner { padding: 32px 20px; }
-  .celebrate-card-name { font-size: 1.5rem !important; }
   .celebrate-rsvp { padding: 60px 0 80px; }
   .celebrate-rsvp-buttons { flex-direction: column; gap: 16px; padding: 0; }
   .celebrate-btn { padding: 16px 40px; width: 80%; }

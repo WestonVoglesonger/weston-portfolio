@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PHONE = '+19802409865';
@@ -272,22 +273,15 @@ export function CelebratePage() {
           <div className="celebrate-card-label">FROM THE MAILBOX</div>
           <h3>The card, as it was sent.</h3>
           <div className="celebrate-card-display">
-            <div className="celebrate-card-inner">
-              <div className="celebrate-card-ornament">&#10022; &#10022; &#10022;</div>
-              <div className="celebrate-card-sub">The Pleasure of Your Company</div>
-              <div className="celebrate-card-name">
-                Thomas Weston<br />Voglesonger
-              </div>
-              <div className="celebrate-card-bachelors">
-                Bachelor of Science &middot; Computer Science
-              </div>
-              <div className="celebrate-card-divider" />
-              <div className="celebrate-card-date">Friday &middot; May 8th &middot; 2026</div>
-              <div className="celebrate-card-time">four to seven in the afternoon</div>
-              <div className="celebrate-card-school">The University of North Carolina</div>
-            </div>
+            <Image
+              src="/assets/celebrate/grad-card.jpeg"
+              alt="Weston Voglesonger — Class of 2026 Graduate, University of North Carolina at Chapel Hill"
+              width={480}
+              height={340}
+              className="celebrate-card-img"
+              priority
+            />
           </div>
-          <div className="celebrate-card-caption">&mdash; placeholder &middot; actual card to replace &mdash;</div>
         </motion.section>
 
         {/* RSVP */}

@@ -89,18 +89,26 @@ export function CelebratePage() {
       const dist = Math.hypot(clientX - cx, clientY - cy);
 
       if (dist < PROXIMITY) {
-        const margin = 40;
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        let newX: number, newY: number, attempts = 0;
-        do {
-          newX = margin + Math.random() * (vw - rect.width - margin * 2);
-          newY = margin + Math.random() * (vh - rect.height - margin * 2);
-          attempts++;
-        } while (
-          Math.hypot(newX + rect.width / 2 - clientX, newY + rect.height / 2 - clientY) < 200 &&
-          attempts < 20
-        );
+        const fleeDistance = 120 + Math.random() * 60;
+        let angle = Math.atan2(cy - clientY, cx - clientX);
+        angle += (Math.random() - 0.5) * 0.8;
+
+        const rsvpArea = btn.closest('.celebrate-info-side');
+        const bounds = rsvpArea
+          ? rsvpArea.getBoundingClientRect()
+          : { left: 0, top: 0, right: window.innerWidth, bottom: window.innerHeight };
+
+        const pad = 8;
+        const minX = bounds.left + pad;
+        const maxX = bounds.right - rect.width - pad;
+        const minY = bounds.top + pad;
+        const maxY = bounds.bottom - rect.height - pad;
+
+        let newX = cx + Math.cos(angle) * fleeDistance - rect.width / 2;
+        let newY = cy + Math.sin(angle) * fleeDistance - rect.height / 2;
+
+        newX = Math.max(minX, Math.min(maxX, newX));
+        newY = Math.max(minY, Math.min(maxY, newY));
 
         setIsEscaping(true);
         setNoPos({ x: newX, y: newY });
@@ -207,7 +215,13 @@ export function CelebratePage() {
                 className={`celebrate-btn celebrate-btn-no${isEscaping ? ' escaping' : ''}`}
                 style={
                   noPos
-                    ? { position: 'fixed', left: noPos.x, top: noPos.y, zIndex: 50 }
+                    ? {
+                        position: 'fixed',
+                        left: noPos.x,
+                        top: noPos.y,
+                        zIndex: 50,
+                        transition: 'left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      }
                     : undefined
                 }
                 onClick={handleNoClick}

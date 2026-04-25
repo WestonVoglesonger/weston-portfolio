@@ -44,11 +44,22 @@ const OUTER_RADIUS = 200;
 const INNER_RADIUS = 60;
 const DRIFT_FACTOR = 20;
 
+const MOBILE_WHISPERS = [
+  'are you sure?',
+  'really?',
+  'positive?',
+  'okay fine.',
+];
+const SHRINK_SCALES = [0.75, 0.5, 0.3, 0.3];
+const MOBILE_TAPS = 4;
+
 export function CelebratePage() {
   const [dodgeCount, setDodgeCount] = useState(0);
   const [whisper, setWhisper] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [mobileTaps, setMobileTaps] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const noBtnRef = useRef<HTMLButtonElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(null);
@@ -62,6 +73,7 @@ export function CelebratePage() {
 
   useEffect(() => {
     document.body.classList.add('celebrate-mode');
+    setIsMobile(window.matchMedia('(pointer: coarse)').matches);
     return () => document.body.classList.remove('celebrate-mode');
   }, []);
 
@@ -209,31 +221,29 @@ export function CelebratePage() {
   }, [handleMouseMove]);
 
   const handleNoClick = () => {
+    if (isMobile) {
+      if (mobileTaps >= MOBILE_TAPS) {
+        setDialogOpen(true);
+        return;
+      }
+      const newTaps = mobileTaps + 1;
+      setMobileTaps(newTaps);
+      if (newTaps < MOBILE_TAPS) {
+        setWhisper(MOBILE_WHISPERS[newTaps - 1]);
+      } else {
+        setWhisper(MOBILE_WHISPERS[3]);
+      }
+      return;
+    }
     if (dodgeCount < MAX_DODGES) return;
     setDialogOpen(true);
-  };
-
-  const handleNoTouch = (e: React.TouchEvent) => {
-    if (dodgeCount < MAX_DODGES) {
-      e.preventDefault();
-      const touch = e.touches[0];
-      // On touch, just snap immediately
-      snapToFarthest(touch.clientX, touch.clientY);
-      const newCount = dodgeCountRef.current + 1;
-      setDodgeCount(newCount);
-      if (newCount < MAX_DODGES) {
-        setWhisper(WHISPERS[newCount - 1]);
-      } else {
-        setWhisper(WHISPERS[2]);
-        setTimeout(() => setWhisper('alright. alright.'), 1200);
-      }
-    }
   };
 
   const handleDialogStay = () => {
     setDialogOpen(false);
     setDodgeCount(0);
     dodgeCountRef.current = 0;
+    setMobileTaps(0);
     applyTransform(0, 0, true);
     setWhisper('knew it.');
   };
@@ -296,8 +306,15 @@ export function CelebratePage() {
               <button
                 ref={noBtnRef}
                 className="celebrate-btn celebrate-btn-no"
+                style={
+                  isMobile && mobileTaps > 0
+                    ? {
+                        transform: `scale(${SHRINK_SCALES[Math.min(mobileTaps - 1, SHRINK_SCALES.length - 1)]})`,
+                        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      }
+                    : undefined
+                }
                 onClick={handleNoClick}
-                onTouchStart={handleNoTouch}
               >
                 No
               </button>

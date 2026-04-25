@@ -215,9 +215,10 @@ export function CelebratePage() {
   }, [snapToFarthest, clampTranslate, applyTransform]);
 
   useEffect(() => {
+    if (isMobile) return;
     document.addEventListener('mousemove', handleMouseMove);
     return () => document.removeEventListener('mousemove', handleMouseMove);
-  }, [handleMouseMove]);
+  }, [handleMouseMove, isMobile]);
 
   const handleNoClick = () => {
     if (isMobile) {

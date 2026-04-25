@@ -50,8 +50,7 @@ const MOBILE_WHISPERS = [
   'positive?',
   'okay fine.',
 ];
-const SHRINK_SCALES = [0.75, 0.55];
-const MOBILE_TAPS = 3;
+const MOBILE_TAPS = 4;
 
 export function CelebratePage() {
   const [dodgeCount, setDodgeCount] = useState(0);
@@ -222,17 +221,13 @@ export function CelebratePage() {
 
   const handleNoClick = () => {
     if (isMobile) {
-      if (mobileTaps >= MOBILE_TAPS) {
+      const newTaps = mobileTaps + 1;
+      if (newTaps >= MOBILE_TAPS) {
         setDialogOpen(true);
         return;
       }
-      const newTaps = mobileTaps + 1;
       setMobileTaps(newTaps);
-      if (newTaps < MOBILE_TAPS) {
-        setWhisper(MOBILE_WHISPERS[newTaps - 1]);
-      } else {
-        setWhisper(MOBILE_WHISPERS[3]);
-      }
+      setWhisper(MOBILE_WHISPERS[newTaps - 1]);
       return;
     }
     if (dodgeCount < MAX_DODGES) return;
@@ -306,14 +301,6 @@ export function CelebratePage() {
               <button
                 ref={noBtnRef}
                 className="celebrate-btn celebrate-btn-no"
-                style={
-                  isMobile && mobileTaps > 0
-                    ? {
-                        transform: `scale(${SHRINK_SCALES[Math.min(mobileTaps - 1, SHRINK_SCALES.length - 1)]})`,
-                        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                      }
-                    : undefined
-                }
                 onClick={handleNoClick}
               >
                 No

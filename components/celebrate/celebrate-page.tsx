@@ -50,8 +50,8 @@ const MOBILE_WHISPERS = [
   'positive?',
   'okay fine.',
 ];
-const SHRINK_SCALES = [0.75, 0.5, 0.3, 0.3];
-const MOBILE_TAPS = 4;
+const SHRINK_SCALES = [0.75, 0.55];
+const MOBILE_TAPS = 3;
 
 export function CelebratePage() {
   const [dodgeCount, setDodgeCount] = useState(0);
@@ -287,7 +287,7 @@ export function CelebratePage() {
           <div className="celebrate-details">
             <DetailRow label="Date" value="Friday, May 8th" />
             <DetailRow label="Time" value="4:00 – 7:00 PM" />
-            <DetailRow label="Place" value="TBD" accent />
+            <DetailRow label="Place" value="236 Hayes Rd, Chapel Hill, 27517" />
             <DetailRow label="Attire" value="As you like it" />
           </div>
 

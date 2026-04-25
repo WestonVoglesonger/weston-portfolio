@@ -40,19 +40,21 @@ const WHISPERS = [
 ];
 
 const MAX_DODGES = 3;
-const PROXIMITY = 80;
+const OUTER_RADIUS = 200;
+const INNER_RADIUS = 60;
+const DRIFT_FACTOR = 20;
 
 export function CelebratePage() {
   const [dodgeCount, setDodgeCount] = useState(0);
-  const [isEscaping, setIsEscaping] = useState(false);
-  const [noPos, setNoPos] = useState<{ x: number; y: number } | null>(null);
   const [whisper, setWhisper] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const noBtnRef = useRef<HTMLButtonElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const dodgeCountRef = useRef(0);
-  const lastDodgeTime = useRef(0);
+  const translateRef = useRef({ x: 0, y: 0 });
+  const isSnapping = useRef(false);
 
   useEffect(() => {
     dodgeCountRef.current = dodgeCount;
@@ -78,73 +80,133 @@ export function CelebratePage() {
     }
   };
 
-  const dodge = useCallback(
-    (clientX: number, clientY: number) => {
-      if (dodgeCountRef.current >= MAX_DODGES) return;
+  const applyTransform = useCallback((x: number, y: number, snap: boolean) => {
+    const btn = noBtnRef.current;
+    if (!btn) return;
+    translateRef.current = { x, y };
+    if (snap) {
+      btn.style.transition = 'transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+    } else {
+      btn.style.transition = 'none';
+    }
+    btn.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  }, []);
 
-      const now = Date.now();
-      if (now - lastDodgeTime.current < 500) return;
+  const getBounds = useCallback(() => {
+    const btn = noBtnRef.current;
+    const wrapper = wrapperRef.current;
+    if (!btn || !wrapper) return null;
 
-      const btn = noBtnRef.current;
-      if (!btn) return;
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const btnW = btn.offsetWidth;
+    const btnH = btn.offsetHeight;
 
-      const rect = btn.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dist = Math.hypot(clientX - cx, clientY - cy);
+    const btnOriginalRect = btn.getBoundingClientRect();
+    const btnBaseLeft = btnOriginalRect.left - translateRef.current.x;
+    const btnBaseTop = btnOriginalRect.top - translateRef.current.y;
 
-      if (dist < PROXIMITY) {
-        lastDodgeTime.current = now;
+    return { wrapperRect, btnW, btnH, btnBaseLeft, btnBaseTop };
+  }, []);
 
-        const vw = window.innerWidth;
-        const vh = window.innerHeight;
-        const margin = 24;
+  const clampTranslate = useCallback((tx: number, ty: number) => {
+    const info = getBounds();
+    if (!info) return { x: tx, y: ty };
+    const { wrapperRect, btnW, btnH, btnBaseLeft, btnBaseTop } = info;
+    const margin = 8;
+    const maxTx = wrapperRect.right - btnW - btnBaseLeft - margin;
+    const minTx = wrapperRect.left - btnBaseLeft + margin;
+    const maxTy = wrapperRect.bottom - btnH - btnBaseTop - margin;
+    const minTy = wrapperRect.top - btnBaseTop + margin;
+    return {
+      x: Math.max(minTx, Math.min(maxTx, tx)),
+      y: Math.max(minTy, Math.min(maxTy, ty)),
+    };
+  }, [getBounds]);
 
-        // Find content areas to avoid (card side)
-        const cardEl = document.querySelector('.celebrate-card-side');
-        const cardRect = cardEl?.getBoundingClientRect();
+  const snapToFarthest = useCallback((cursorX: number, cursorY: number) => {
+    const info = getBounds();
+    if (!info) return;
+    const { wrapperRect, btnW, btnH, btnBaseLeft, btnBaseTop } = info;
 
-        let newX: number, newY: number, attempts = 0;
-        do {
-          // Bias toward the right half and open space
-          newX = margin + Math.random() * (vw - rect.width - margin * 2);
-          newY = margin + Math.random() * (vh - rect.height - margin * 2);
-          attempts++;
+    const cardEl = document.querySelector('.celebrate-card-side');
+    const cardRect = cardEl?.getBoundingClientRect();
+    const pad = 24;
 
-          // Check if overlapping the card
-          const overlapsCard = cardRect &&
-            newX < cardRect.right + 20 &&
-            newX + rect.width > cardRect.left - 20 &&
-            newY < cardRect.bottom + 20 &&
-            newY + rect.height > cardRect.top - 20;
+    let bestDist = 0;
+    let bestTx = translateRef.current.x;
+    let bestTy = translateRef.current.y;
 
-          const farEnough = Math.hypot(newX + rect.width / 2 - clientX, newY + rect.height / 2 - clientY) >= 250;
+    for (let i = 0; i < 20; i++) {
+      const candidateLeft = wrapperRect.left + 10 + Math.random() * (wrapperRect.width - btnW - 20);
+      const candidateTop = wrapperRect.top + 10 + Math.random() * (wrapperRect.height - btnH - 20);
 
-          if (!overlapsCard && farEnough) break;
-        } while (attempts < 40);
-
-        setIsEscaping(true);
-        setNoPos({ x: newX, y: newY });
-
-        const newCount = dodgeCountRef.current + 1;
-        setDodgeCount(newCount);
-
-        if (newCount < MAX_DODGES) {
-          setWhisper(WHISPERS[newCount - 1]);
-        } else {
-          setWhisper(WHISPERS[2]);
-          setTimeout(() => setWhisper('alright. alright.'), 1200);
-        }
+      if (cardRect &&
+        candidateLeft < cardRect.right + pad &&
+        candidateLeft + btnW > cardRect.left - pad &&
+        candidateTop < cardRect.bottom + pad &&
+        candidateTop + btnH > cardRect.top - pad) {
+        continue;
       }
-    },
-    [],
-  );
+
+      const centerX = candidateLeft + btnW / 2;
+      const centerY = candidateTop + btnH / 2;
+      const dist = Math.hypot(centerX - cursorX, centerY - cursorY);
+      if (dist > bestDist) {
+        bestDist = dist;
+        bestTx = candidateLeft - btnBaseLeft;
+        bestTy = candidateTop - btnBaseTop;
+      }
+    }
+
+    const clamped = clampTranslate(bestTx, bestTy);
+    isSnapping.current = true;
+    applyTransform(clamped.x, clamped.y, true);
+    setTimeout(() => { isSnapping.current = false; }, 200);
+  }, [getBounds, clampTranslate, applyTransform]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (dodgeCountRef.current >= MAX_DODGES) return;
+    if (isSnapping.current) return;
+
+    const btn = noBtnRef.current;
+    if (!btn) return;
+
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = e.clientX - cx;
+    const dy = e.clientY - cy;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist < INNER_RADIUS) {
+      // Snap: cursor breached inner zone
+      snapToFarthest(e.clientX, e.clientY);
+
+      const newCount = dodgeCountRef.current + 1;
+      setDodgeCount(newCount);
+
+      if (newCount < MAX_DODGES) {
+        setWhisper(WHISPERS[newCount - 1]);
+      } else {
+        setWhisper(WHISPERS[2]);
+        setTimeout(() => setWhisper('alright. alright.'), 1200);
+      }
+    } else if (dist < OUTER_RADIUS) {
+      // Drift: gradual magnetic repulsion
+      const strength = 1 - dist / OUTER_RADIUS;
+      const moveX = (-dx / dist) * strength * DRIFT_FACTOR;
+      const moveY = (-dy / dist) * strength * DRIFT_FACTOR;
+      const newTx = translateRef.current.x + moveX;
+      const newTy = translateRef.current.y + moveY;
+      const clamped = clampTranslate(newTx, newTy);
+      applyTransform(clamped.x, clamped.y, false);
+    }
+  }, [snapToFarthest, clampTranslate, applyTransform]);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => dodge(e.clientX, e.clientY);
-    document.addEventListener('mousemove', handler);
-    return () => document.removeEventListener('mousemove', handler);
-  }, [dodge]);
+    document.addEventListener('mousemove', handleMouseMove);
+    return () => document.removeEventListener('mousemove', handleMouseMove);
+  }, [handleMouseMove]);
 
   const handleNoClick = () => {
     if (dodgeCount < MAX_DODGES) return;
@@ -155,7 +217,16 @@ export function CelebratePage() {
     if (dodgeCount < MAX_DODGES) {
       e.preventDefault();
       const touch = e.touches[0];
-      dodge(touch.clientX, touch.clientY);
+      // On touch, just snap immediately
+      snapToFarthest(touch.clientX, touch.clientY);
+      const newCount = dodgeCountRef.current + 1;
+      setDodgeCount(newCount);
+      if (newCount < MAX_DODGES) {
+        setWhisper(WHISPERS[newCount - 1]);
+      } else {
+        setWhisper(WHISPERS[2]);
+        setTimeout(() => setWhisper('alright. alright.'), 1200);
+      }
     }
   };
 
@@ -163,8 +234,7 @@ export function CelebratePage() {
     setDialogOpen(false);
     setDodgeCount(0);
     dodgeCountRef.current = 0;
-    setIsEscaping(false);
-    setNoPos(null);
+    applyTransform(0, 0, true);
     setWhisper('knew it.');
   };
 
@@ -176,7 +246,7 @@ export function CelebratePage() {
   };
 
   return (
-    <div className="celebrate">
+    <div className="celebrate" ref={wrapperRef}>
       <div className="celebrate-layout">
         {/* CARD */}
         <motion.div
@@ -225,18 +295,7 @@ export function CelebratePage() {
 
               <button
                 ref={noBtnRef}
-                className={`celebrate-btn celebrate-btn-no${isEscaping ? ' escaping' : ''}`}
-                style={
-                  noPos
-                    ? {
-                        position: 'fixed',
-                        left: noPos.x,
-                        top: noPos.y,
-                        zIndex: 50,
-                        transition: 'left 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                      }
-                    : undefined
-                }
+                className="celebrate-btn celebrate-btn-no"
                 onClick={handleNoClick}
                 onTouchStart={handleNoTouch}
               >

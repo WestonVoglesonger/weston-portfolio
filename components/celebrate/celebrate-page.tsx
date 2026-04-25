@@ -50,6 +50,8 @@ const MOBILE_WHISPERS = [
   'positive?',
   'okay fine.',
 ];
+const MOBILE_MIN_SCALE = 0.6;
+const MOBILE_SHRINK_RATE = 0.85;
 const MOBILE_TAPS = 4;
 
 export function CelebratePage() {
@@ -301,6 +303,14 @@ export function CelebratePage() {
               <button
                 ref={noBtnRef}
                 className="celebrate-btn celebrate-btn-no"
+                style={
+                  isMobile && mobileTaps > 0
+                    ? {
+                        transform: `scale(${Math.max(MOBILE_MIN_SCALE, MOBILE_SHRINK_RATE ** mobileTaps)})`,
+                        transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      }
+                    : undefined
+                }
                 onClick={handleNoClick}
               >
                 No
